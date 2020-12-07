@@ -1,12 +1,12 @@
 ﻿# _프로젝트_
-## 1. [FaceUnlock/lock](https://github.com/EunJinK/Project/FaceUnlock)
+## 1. [FaceUnlock/lock](#1-faceunlocklock)
 - 3학년 2학기 임베디드비전시스템의 기말 팀프로젝트(2인1조)
 - Python기반 OpenCV를 이용한 자율 프로젝트
 - 얼굴 인식하여 Unlock/lock표현, 인식할 얼굴을 사진찍어 저장 후 학습, 저장된 사용자가 아닐 시 비디오 촬영이 가능한 프로그램 개발
 
 
 
-## 2. [P2P File Transfer & Chatting system](https://github.com/EunJinK/Project/P2PFileTransferchattingsystem)
+## 2. [P2P File Transfer & Chatting system](#2-p2p-file-transfer--chatting-system)
 - 3학년 2학기 임베디드운영체제의 기말 팀프로젝트(2인1조)
 - 환경 : Linux, 언어 : C
 - 원격 접속 터미널 Putty 사용
@@ -18,7 +18,7 @@
 
 
 
-## 3. [화재감지시스템](https://github.com/EunJinK/Project/Fire)
+## 3. [화재감지시스템](#3-화재감지시스템)
 - 4학년 1학기 고급임베디드시스템의 기말 팀프로젝트(2인1조)
 - Achro.imx6q 보드를 이용하여 Linux환경에서 프로젝트 진행
 - LCD, 7Segement, Push Switch, Step Motor, Buzzer, Dot Matrix, LED모듈, 화재감지 센서를 이용하여 제작
