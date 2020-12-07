@@ -1,0 +1,342 @@
+﻿/* fire 디렉토리에 들어있는 project_fire와 같은 파일임
+필요없는 코드 지우고 주석추가한 버전 */
+
+#include "../include/fpga_test.h"
+#include "/root/work/achroimx6q/fpga_driver/include/fpga_dot_font.h"
+
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <string.h>
+
+unsigned char quit = 0;
+void user_signal1(int sig) {quit = 1;}
+
+int fire_led(int a)   // led실행 함수
+{
+	unsigned char led_data1, led_data2;
+	led_data1 = 15; //밑에 줄
+	led_data2 = 240; //위에 줄
+
+	write(a, &led_data1, 1);   //led 밑에 줄 실행
+	usleep(500000);
+	write(a, &led_data2, 1);    //led 위에 줄 실행
+}
+	
+int main(void)
+{
+
+	unsigned char text_lcd_buf[TEXT_LCD_MAX_BUF]; //시간문구 (oo:oo:oo)
+	char main[TEXT_LCD_MAX_BUF]; //lcd에 띄울 전체 문구
+
+	char fire_data[4]; //fnd
+
+	int t_hour = 0, t_min = 0, t_sec = 0;
+	int fire_h, fire_m, fire_s; //화재감지시간을 저장할 변수
+
+	pid_t pid; //화재가 감지됐을시 프로세스와 시간이 흐르는 프로세스를 나누기 위해
+
+	unsigned char push_sw_buf[PUSH_SWITCH_MAX_BUTTON];
+	unsigned char buzzer_state;
+
+	unsigned char step_motor_state[3]; //모터실행
+	unsigned char step_motor_state_stop[3]; //모터중지
+
+	unsigned char led_reset; //led전체 중지
+	led_reset = 0;
+
+	int fd, buzzer_dev, dot_dev, step_dev, led_dev, push_dev, text_lcd_dev; //open
+	int fnd_dev; //open
+
+	int j; //fnd에 표현하기 전 for문에 쓰일 변수
+	memset(fire_data, 0, sizeof(fire_data)); //fnd초기화
+
+	int count = 0; //모터실행 전 시간을 카운트해줄 변수
+
+	char buf[10] = {0};
+
+	int mon = 6, day = 19; //fnd에 표현할 날짜 변수
+
+	fd = open("/dev/ext_fire_sens", O_RDWR);   //불꽃 감지 센서 오픈
+	buzzer_dev = open(BUZZER_DEVICE, O_RDWR); //부저 오픈
+	dot_dev = open(DOT_DEVICE, O_WRONLY);  //도트매트릭스 오픈
+	step_dev = open(STEP_MOTOR_DEVICE, O_WRONLY); //스텝모터 오픈
+	push_dev = open(PUSH_SWITCH_DEVICE, O_RDONLY); //푸시 스위치 오픈
+	text_lcd_dev = open(TEXT_LCD_DEVICE, O_WRONLY); //text lcd 오픈
+	led_dev = open(LED_DEVICE, O_RDWR);  //led 오픈
+	fnd_dev = open(FND_DEVICE, O_RDWR); //fnd 오픈
+
+	memset(step_motor_state, 0, sizeof(step_motor_state)); //스텝모터실행(on/off , right/left , fast/slow) 변수 초기화
+	step_motor_state[0] = 1; //start
+	step_motor_state[1] = 0; //right
+	step_motor_state[2] = 2; //speed 2 (숫자가 낮을수록 빠름)
+
+	memset(step_motor_state_stop, 0, sizeof(step_motor_state_stop)); //스텝모터중지 변수 초기화
+	step_motor_state_stop[0] = 0; //스텝모터 중지
+	step_motor_state_stop[1] = 0;
+	step_motor_state_stop[2] = 2;
+
+	if(fd<0)
+	{
+		perror("/dev/ext_fire_sens error");
+		exit(-1);
+	}
+	else
+	{
+		printf("< ext_fire_sens device has been detected >\n");
+	}
+	pid = fork();
+
+	(void)signal(SIGINT,user_signal1);
+
+	memset(text_lcd_buf, ' ', TEXT_LCD_MAX_BUF);
+	write(text_lcd_dev, text_lcd_buf, TEXT_LCD_MAX_BUF);
+	
+	while(!quit)
+	{
+		if(pid > 0) //부모프로세스 ( 화재 감지 )
+		{
+			read(fd,buf,10);
+			write(dot_dev, fpga_set_smile, sizeof(fpga_set_smile)); // 화재가 감지 되기 전 항상 smile dot 를 유지
+			count = 0; //스텝모터 실행 전 카운트 0 초기화
+			if(buf[0] == '0') //불꽃이 감지가 되면
+			{	
+				printf("outbreak of fire ! !\n"); //불꽃 감지 출력
+				buzzer_state = BUZZER_ON; //buzzer_state변수에 0(on)을 저장
+				while(1)
+				{
+					usleep(400000);
+					read(push_dev, &push_sw_buf, sizeof(push_sw_buf));
+					
+					buzzer_state = BUZZER_TOGGLE(buzzer_state); //부저 토글
+					write(buzzer_dev, &buzzer_state, 1); //부저 실행
+					fire_led(led_dev); //led함수 실행
+					write(dot_dev, fpga_fire, sizeof(fpga_fire)); //dot매트릭스 불모양  실행
+					usleep(500000); //dot매트릭스 (불모양)을 깜빡거리게 하기 위함
+					write(dot_dev, fpga_set_blank, sizeof(fpga_set_blank)); //dot매트릭스 끔
+					count++; //count더하기
+					if(count > 5) //5초 동안 화재발생으로 인한 모듈들의 실행이 중지가 안된다면
+						write(step_dev,step_motor_state,3); //스탭모터 실행
+
+					if(push_sw_buf[7] == 1) //중지 버튼 클릭시
+					{
+						printf("--------Stop working--------\n");
+						write(step_dev,step_motor_state_stop,3); //중지 실행 -> 스텝모터 중지
+						buzzer_state = BUZZER_OFF; //부저 중지
+						write(buzzer_dev, &buzzer_state, 1); //부저 중지
+						write(dot_dev, fpga_set_smile, sizeof(fpga_set_smile)); //dot매트릭스 끔
+						write(led_dev, &led_reset, 1);   //led 끄기
+						break; //while을 빠져나와 다시 화재센서를 read
+					}
+				}	
+			}	
+		}
+	
+		else if(pid == 0) //자식 프로세스 ( 시간 흐르는 프로세스 )
+		{
+			if(t_sec >= 60)
+			{
+				t_sec = 0;
+				t_min += 1;
+			}
+			if(t_min >= 60)
+			{
+				t_min = 0;
+				t_hour += 1;
+			}	
+			if(t_hour >= 24)
+				t_hour = 0;
+
+			char now_time[TEXT_LCD_MAX_BUF] = "  Current Time  ";
+			memset(text_lcd_buf, ' ', strlen(text_lcd_buf));
+			char str[TEXT_LCD_MAX_BUF] = " : ";
+			char bin[TEXT_LCD_MAX_BUF] = "     ";
+			sprintf(text_lcd_buf, "  %d%s%d%s%d%s", t_hour, str, t_min, str, t_sec, bin);
+			sprintf(main,"%s%s\n",now_time,text_lcd_buf);  // "  Current Time       00 : 00 : 00  "으로 합치기
+			
+			printf("%d : %d : %d\n", t_hour, t_min, t_sec);
+			write(text_lcd_dev, main, strlen(main));
+			
+			sprintf(fire_data, "%02d%02d", mon, day); //mon과 day를 2자리수만큼 빈공간 0으로 채워서 fire_data에 합치기 ex) mon = 1이면 01로 채워서 저장
+			for(j=0;j<4;j++)
+				fire_data[j] = fire_data[j] - 0x30;
+			write(fnd_dev,fire_data,FND_MAX_DIGIT);
+
+			usleep(500000);	
+			t_sec = t_sec+1;
+
+			usleep(500000);
+			read(fd,buf,10);
+			if(buf[0] == '0') //화재 감지가 된다면
+			{
+				fire_h = t_hour; //화재 감지가 된 시간을 fire_h,m,s 에 저장
+				fire_m = t_min;
+				fire_s = t_sec;
+				printf("-----fire time = %d : %d : %d ------\n", fire_h, fire_m, fire_s);
+			}
+		
+			read(push_dev, &push_sw_buf, sizeof(push_sw_buf)); //시간을 조정하기 위한 스위치값 read
+			if(push_sw_buf[0] == 1) //첫번째 버튼이 눌렸으면 시간 set mode로 들어감
+			{
+				printf("--------Time set mode--------\n");
+				char set[TEXT_LCD_MAX_BUF] = "    Time set    ";
+				char str[TEXT_LCD_MAX_BUF] = " : ";
+				char bin[TEXT_LCD_MAX_BUF] = "     ";
+				memset(text_lcd_buf, ' ', strlen(text_lcd_buf));
+				sprintf(text_lcd_buf, "  %d%s%d%s%d%s", t_hour, str, t_min, str, t_sec,bin);
+				sprintf(main,"%s%s\n",set,text_lcd_buf); 
+				write(text_lcd_dev, main, strlen(main)); // "   Time set     00 : 00 : 00   "으로 출력한 뒤 버튼이 눌리는 것에 따라 실시간으로 보여짐
+				while(push_sw_buf[2] != 1) // 세번째 버튼(시간조정완료)이 누르기 전까지
+				{
+					usleep(400000);
+					read(push_dev, &push_sw_buf, sizeof(push_sw_buf));
+					if(push_sw_buf[3] == 1) // 네번째 버튼 hour++
+					{
+						if(t_hour < 23)
+						{
+							t_hour += 1;
+							printf("%d hour\n", t_hour);
+					
+							sprintf(text_lcd_buf, "  %d%s%d%s%d%s", t_hour, str, t_min, str, t_sec,bin);
+							sprintf(main,"%s%s\n",set,text_lcd_buf);
+							write(text_lcd_dev, main, strlen(main));
+						}
+						else if(t_hour >=23)
+						{
+							t_hour = 0;
+							if(mon <= 12) //24시가 되면 날짜+
+							{
+								if(mon > 2 && mon%2 == 0)
+								{
+									if(day<30)
+									{
+										day += 1;
+										printf("day++\n");
+									}
+									else if(day == 30)
+									{
+										mon += 1;
+										day = 1;
+									}
+								}
+								else if(mon%2 != 0)
+								{
+									if(day<31)
+										day += 1;
+									else if(day == 31)
+										mon += mon;
+								}
+								else if(mon == 2)
+								{
+									if(day<28)
+										day += 1;
+									else if(day == 28)
+									{
+										mon += 1;
+										day = 1;
+									}
+								}
+							}
+							else if(mon == 12)
+							{
+								if(day<30)
+								{
+									day += 1;
+									printf("day++\n");
+								}
+								else if(day == 30)
+								{
+									mon = 1;
+									day = 1;
+								}
+							}
+							printf("%d hour\n", t_hour);
+							sprintf(text_lcd_buf, "  %d%s%d%s%d%s", t_hour, str, t_min, str, t_sec,bin);
+							sprintf(main,"%s%s\n",set,text_lcd_buf);
+							write(text_lcd_dev, main, strlen(main));
+						}
+					}
+
+					else if(push_sw_buf[4] == 1) //다섯번째 버튼 min+
+					{
+						if(t_min < 59)
+						{
+							t_min += 1;
+							printf("%d min\n", t_min);
+							sprintf(text_lcd_buf, "  %d%s%d%s%d%s", t_hour, str, t_min, str, t_sec,bin);
+							sprintf(main,"%s%s\n",set,text_lcd_buf);
+							write(text_lcd_dev, main, strlen(main));	
+						}
+						else if(t_min >= 59)
+						{
+							t_min = 0;
+							t_hour += 1;
+							printf("%d min\n", t_min);
+							sprintf(text_lcd_buf, "  %d%s%d%s%d%s", t_hour, str, t_min, str, t_sec,bin);
+							sprintf(main,"%s%s\n",set,text_lcd_buf);
+							write(text_lcd_dev, main, strlen(main));
+						}
+					}
+
+					else if(push_sw_buf[5] == 1) //6번째 버튼 sec+
+					{
+						if(t_sec < 59)
+						{
+							t_sec += 1;
+							printf("%d sec\n", t_sec);	
+							sprintf(text_lcd_buf, "  %d%s%d%s%d%s", t_hour, str, t_min, str, t_sec,bin);
+							sprintf(main,"%s%s\n",set,text_lcd_buf);
+							write(text_lcd_dev, main, strlen(main));
+						}
+						else if(t_sec >= 59)
+						{
+							t_sec = 0;
+							t_min += 1;
+							printf("%d sec\n", t_sec);
+							sprintf(text_lcd_buf, "  %d%s%d%s%d%s", t_hour, str, t_min, str, t_sec,bin);
+							sprintf(main,"%s%s\n",set,text_lcd_buf);
+							write(text_lcd_dev, main, strlen(main));
+						}
+					}	
+				}
+			}
+			else if(push_sw_buf[6] ==1) //일곱번째 버튼은 화재 감지된 시간을 lcd에 띄우는 버튼
+			{
+				while(push_sw_buf[8]!=1) //아홉번째 버튼이 눌리기 전까지
+				{
+					usleep(400000);
+					read(push_dev, &push_sw_buf, sizeof(push_sw_buf));
+					if(t_sec >= 60)  //lcd화면에 보여지는 동안 계속 시간은 흐르도록 
+					{
+						t_sec = 0;
+						t_min += 1;
+					}
+					if(t_min >= 60)
+					{
+						t_min = 0;
+						t_hour += 1;
+					}	
+					if(t_hour >= 24)
+						t_hour = 0;
+					sleep(1);	
+					t_sec = t_sec+1;
+					char bin[TEXT_LCD_MAX_BUF] = "     ";
+					char fire_time[TEXT_LCD_MAX_BUF] = "    Fire Time   ";
+					sprintf(text_lcd_buf, "  %d%s%d%s%d%s", fire_h, str, fire_m, str, fire_s,bin);
+					sprintf(main,"%s%s\n",fire_time,text_lcd_buf);
+					write(text_lcd_dev, main, strlen(main)); //화재 감지시 저장된 fire_h,m,s을 lcd에 띄우기
+				}
+			}
+		}
+	}
+	close(fnd_dev);
+	close(buzzer_dev);
+	close(step_dev);
+	close(led_dev);
+	close(dot_dev);
+	close(text_lcd_dev);
+	close(fd);  //open한 모듈들 다 close
+	printf("--------END--------\n");
+	return 0;	
+}

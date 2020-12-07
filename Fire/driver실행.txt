@@ -1,0 +1,43 @@
+﻿타겟 IP 주소 설정
+(Target) ifconfig eth0 192.168.1.222
+
+TFTP 서버 구동, 확인
+(Host) service xinetd restart
+(Host) netstat –a | grep tftp
+
+LED
+(Host) cp <파일명> /tftpboot    	//파일명 : fpga_led_driver.ko , fpga_led_test
+(Target) tftp –r <파일명> -g 192.168.1.70
+
+(Target) chmod +x  fpga_led_test
+(Target) insmod fpga_led_driver.ko
+(Target)mknod  /dev/fpga_led  c  260  0
+(Target)  ./fpga_led_test 1
+
+FND
+(Host) cp <파일명> /tftpboot  	 //파일명 : fpga_fnd_driver.ko, fpga_fnd_test
+(Target) tftp –r <파일명> -g 192.168.1.70
+
+(Target) chmod +x  fpga_fnd_test
+(Target) insmod fpga_fnd_driver.ko
+(Target)mknod  /dev/fpga_fnd  c  261  0
+(Target)  ./fpga_fnd_test 1(표현할 문자)
+
+Dot
+(Host) cp <파일명> /tftpboot  	 //파일명 : fpga_dot_driver.ko, fpga_dot_test
+(Target) tftp –r <파일명> -g 192.168.1.70
+
+(Target) chmod +x  fpga_dot_test
+(Target) insmod fpga_dot_driver.ko
+(Target)mknod  /dev/fpga_dot  c  26x  0 // x = 선언한 숫자 대입
+(Target)  ./fpga_dot_test 1(표현할 문자)
+
+
+push switch
+(Host) cp <파일명> /tftpboot  	 //파일명 : fpga_push_switch_driver.ko, fpga_push_switch_test
+(Target) tftp –r <파일명> -g 192.168.1.70
+
+(Target) chmod +x  fpga_push_switch_test
+(Target) insmod fpga_push_switch_driver.ko
+(Target)mknod  /dev/fpga_push_switch  c  26x  0 // x = 선언한 숫자 대입
+(Target)  ./fpga_push_switch_test
