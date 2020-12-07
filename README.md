@@ -18,7 +18,17 @@
 
 
 
-## 3. [화재감지시스템](https://github.com/EunJinK/Project/tree/main/Fire/fire)
+## 3. [물품대여시스템](https://github.com/EunJinK/Project/tree/main/GoodsRental)
+- 3학년 2학기 센서응용시스템의 기말 팀프로젝트(3인1조)
+- ESP-8266을 기반으로한 자율 프로젝트
+- ESP와 MQTT를 이용하여 물품대여시스템을 제작
+- 보드2개, 초음파센서, 로터리엔코더를 이용하여 기능수행
+  - 프로젝트내용
+    - [README](https://github.com/EunJinK/Project/tree/main/GoodsRental/README.txt)
+
+
+
+## 4. [화재감지시스템](https://github.com/EunJinK/Project/tree/main/Fire/fire)
 - 4학년 1학기 고급임베디드시스템의 기말 팀프로젝트(2인1조)
 - Achro.imx6q 보드를 이용하여 Linux환경에서 프로젝트 진행
 - LCD, 7Segement, Push Switch, Step Motor, Buzzer, Dot Matrix, LED모듈, 화재감지 센서를 이용하여 제작
