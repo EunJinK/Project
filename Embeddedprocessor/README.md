@@ -15,6 +15,23 @@
   - 설정된 알람과 현재 시간이 맞으면 알람음 발생
     - 알람이 켜지자마자 설정되었던 해당 알람시간은 초기화
     - PIND.0 인터럽트 발생시 알람음 정지
+- 모드 키(M3)를 이용해 AM/PM 변환 가능
+
+- 결과사진
+<div>
+<img src="https://user-images.githubusercontent.com/59238838/101476857-b71b6880-3991-11eb-9b09-16907857bb66.PNG" width="300" height="300">
+<img src="https://user-images.githubusercontent.com/59238838/101476854-b5ea3b80-3991-11eb-8ffe-ebac8daf2d63.PNG" width="300" height="300">	
+</div>
+<samp>
+	초기 시간 설정(왼), 알람 시간 설정(오)
+</samp>
+<div>
+<img src="https://user-images.githubusercontent.com/59238838/101476851-b551a500-3991-11eb-8928-4e0e03170725.PNG" width="300" height="300">
+<img src="https://user-images.githubusercontent.com/59238838/101476829-acf96a00-3991-11eb-8d55-2af5c73bb3ca.PNG" width="300" height="300">
+</div>
+<samp>
+	알람화면(왼), AM/PM 변환 화면(오)
+</samp>	
 
 
 ## _2. safe_
