@@ -40,3 +40,13 @@
 <img src="https://user-images.githubusercontent.com/59238838/101474289-49217200-398e-11eb-908f-bc9ed99ab8c4.PNG" width="300" height="300">
 <img src="https://user-images.githubusercontent.com/59238838/101474300-4fafe980-398e-11eb-811a-40383272705a.PNG" width="300" height="300">	
 </div>
+<samp>
+	관리자 비밀번호 설정(왼), 초기 비밀번호 4자리 설정(오)
+</samp>
+<div>
+<img src="https://user-images.githubusercontent.com/59238838/101474303-50e11680-398e-11eb-8c8d-f12058bcb446.PNG" width="300" height="300">
+<img src="https://user-images.githubusercontent.com/59238838/101474311-53437080-398e-11eb-84e5-899508306e32.PNG" width="300" height="300">
+</div>
+<samp>
+	비밀번호 입력 후 성공/실패(왼), 2번 이상의 오류로 관리자비밀번호를 입력하여 재오픈(오)
+</samp>	
