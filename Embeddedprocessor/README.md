@@ -35,3 +35,14 @@
   - 비밀번호를 틀리게 입력하면 실패알림음이 울린 후 "---- Error! ----" 출력
   - 에러 2번 이상이면 관리자비밀번호를 받음
 
+- 결과사진
+<p align="center">
+<img src="https://user-images.githubusercontent.com/59238838/101474289-49217200-398e-11eb-908f-bc9ed99ab8c4.PNG" width="200" height="200"><br>
+	<samp>
+		관리자 비밀번호 설정
+	</samp>
+<img src="https://user-images.githubusercontent.com/59238838/101474300-4fafe980-398e-11eb-811a-40383272705a.PNG" width="200" height="200"><br>
+	<samp>
+		비밀번호4자리 설정
+	</samp>
+</p>
