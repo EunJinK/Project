@@ -37,6 +37,6 @@
 
 - 결과사진
 <div>
-<img src="https://user-images.githubusercontent.com/59238838/101474289-49217200-398e-11eb-908f-bc9ed99ab8c4.PNG" width="200" height="200">
-<img src="https://user-images.githubusercontent.com/59238838/101474300-4fafe980-398e-11eb-811a-40383272705a.PNG" width="200" height="200">	
+<img src="https://user-images.githubusercontent.com/59238838/101474289-49217200-398e-11eb-908f-bc9ed99ab8c4.PNG" width="300" height="300">
+<img src="https://user-images.githubusercontent.com/59238838/101474300-4fafe980-398e-11eb-811a-40383272705a.PNG" width="300" height="300">	
 </div>
