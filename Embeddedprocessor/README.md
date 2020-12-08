@@ -36,9 +36,11 @@
   - 에러 2번 이상이면 관리자비밀번호를 받음
 
 - 결과사진
-<p align="left ">
-<img src="https://user-images.githubusercontent.com/59238838/101474289-49217200-398e-11eb-908f-bc9ed99ab8c4.PNG" width="200" height="200">
-</p>
-<p align="center">
-<img src="https://user-images.githubusercontent.com/59238838/101474300-4fafe980-398e-11eb-811a-40383272705a.PNG" width="200" height="200">	
-</p>
+<dib>
+<img src="https://user-images.githubusercontent.com/59238838/101474289-49217200-398e-11eb-908f-bc9ed99ab8c4.PNG" width="300" height="300">
+<img src="https://user-images.githubusercontent.com/59238838/101474300-4fafe980-398e-11eb-811a-40383272705a.PNG" width="300" height="300">	
+</div>
+<br>
+<samp>
+	라라라
+</samp>
